@@ -33,6 +33,7 @@ async def test_duplicated_code_returns_409_problem(api: AsyncClient) -> None:
     assert response.status_code == 409
     assert response.headers["content-type"] == "application/problem+json"
     assert "A00123" in response.json()["detail"]
+    assert response.json()["errors"][0]["field"] == "code"
 
 
 async def test_duplicated_email_returns_409(api: AsyncClient) -> None:
@@ -41,6 +42,7 @@ async def test_duplicated_email_returns_409(api: AsyncClient) -> None:
     response = await api.post(URL, json=student(code="B00001", email="ANA.PEREZ@s4.edu"))
 
     assert response.status_code == 409
+    assert response.json()["errors"][0]["field"] == "email"
 
 
 async def test_invalid_body_returns_422_with_field_errors(api: AsyncClient) -> None:

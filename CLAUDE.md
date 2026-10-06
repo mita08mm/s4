@@ -22,9 +22,11 @@ Hecho:
 - Datos decididos (`docs/adr/0011-modelo-de-datos.md`): `Student` (`code`, nombre, apellido, email obligatorio y único), `Class` (`code`, título, descripción opcional), `Enrollment` (fecha), con cascada al eliminar e inscripción idempotente. Ids UUID v7; `code` en mayúsculas y email en minúsculas.
 - **Backend `students` completo** y es el molde a copiar para `classes`: dominio (dataclasses + `Protocol`), un caso de uso por archivo con `UnitOfWork.commit()` explícito, repositorio SQLAlchemy (búsqueda AND de ORs con `ILIKE` escapado), router en `/api/v1/students` con `problem_responses(...)`, providers en `container.py`, modelo registrado en `shared/database/models.py`, migración, seed idempotente (`migrate` corre `alembic upgrade head` + seed), tests unitarios con fakes en memoria y tests de integración contra `<db>_test` con rollback por test (ADR 0010).
 
+- **Frontend `/students` completo** y es el molde para `/classes`: la página (Server Component) lee `searchParams` y llama a `features/students/queries.ts`; `StudentsView` (cliente) une la búsqueda con debounce en `?q=`, la tabla con filas animadas (`motion.create(TableRow)`), la paginación (`shared/ui/pagination-links.tsx`), el panel `StudentSheet` (React Hook Form + Zod con `Controller` y `useFormState`, compatibles con React Compiler) y el `DeleteStudentDialog`. Las escrituras son Server Actions en `features/students/actions.ts`: validan de nuevo con el mismo esquema Zod, llaman al API, traducen Problem Details a errores por campo (el 409 trae `errors[].field`) y llaman a `refresh()`. Atajo `N` para crear. `loading.tsx` y `error.tsx` (en Next 16 la prop es `retry`, no `reset`).
+
 Siguiente (en este orden):
-1. Frontend `/students`: tabla con filas animadas, búsqueda con debounce reflejada en la URL, panel lateral (`sheet`) para crear y editar con React Hook Form + Zod, avisos con Sonner, confirmación al eliminar.
-2. `classes` (back + front) siguiendo el molde de `students`, y luego `enrollments` (inscribir varias clases a la vez, consultas en ambos sentidos).
+1. `classes` (back + front) siguiendo el molde de `students`.
+2. `enrollments`: inscribir varias clases a la vez, consultas en ambos sentidos, y detalle de estudiante y de clase con sus inscripciones.
 3. Pendientes: colección de Bruno (`bruno/`), tipos del front generados desde OpenAPI (ADR 0012), CI con GitHub Actions (ADR 0014), Playwright E2E.
 4. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
 

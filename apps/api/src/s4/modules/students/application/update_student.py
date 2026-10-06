@@ -24,12 +24,12 @@ class UpdateStudent:
         if changes.code is not None:
             code = normalize_code(changes.code)
             if await self._repository.code_exists(code, exclude_id=student.id):
-                raise ConflictError(f"Ya existe un estudiante con el código {code}.")
+                raise ConflictError(f"Ya existe un estudiante con el código {code}.", field="code")
             student.code = code
         if changes.email is not None:
             email = normalize_email(changes.email)
             if await self._repository.email_exists(email, exclude_id=student.id):
-                raise ConflictError(f"Ya existe un estudiante con el email {email}.")
+                raise ConflictError(f"Ya existe un estudiante con el email {email}.", field="email")
             student.email = email
         if changes.first_name is not None:
             student.first_name = changes.first_name.strip()

@@ -32,7 +32,7 @@ apps/web/
 │   │   └── page.tsx
 │   ├── features/                 # una carpeta por funcionalidad
 │   │   ├── home/                 #   components/ (hero, tarjetas), queries.ts
-│   │   ├── students/             #   components/, actions.ts, queries.ts, schemas.ts
+│   │   ├── students/             #   components/, actions.ts, queries.ts, schemas.ts, types.ts
 │   │   ├── classes/
 │   │   └── enrollments/
 │   └── shared/                   # piezas técnicas reutilizables
@@ -67,6 +67,17 @@ flowchart LR
 - Ventajas: no hay CORS, la URL interna del API no se expone y la configuración se lee en tiempo de ejecución (la misma imagen sirve en cualquier entorno).
 - `shared/lib/api-client.ts` centraliza las llamadas: si el API responde con error, lanza un `ApiError` con el Problem Details (RFC 9457) para mostrar mensajes claros.
 - Los módulos de servidor importan `server-only`, así un error de importación desde un Client Component falla en el build.
+
+### Patrón de una feature (ejemplo: `students`)
+
+| Archivo | Rol |
+|---|---|
+| `queries.ts` | Lecturas desde Server Components (`server-only`) |
+| `actions.ts` | Server Actions (`"use server"`) para crear, editar y eliminar: validan con Zod, llaman al API, traducen los Problem Details a errores por campo y llaman a `refresh()` |
+| `schemas.ts` | Esquema Zod compartido por el formulario y las Server Actions (mismas reglas que el API) |
+| `components/` | Vista cliente: búsqueda (`?q=` en la URL con debounce), tabla animada, panel de formulario y diálogo de confirmación |
+
+Las Server Actions son endpoints públicos, por eso validan la entrada otra vez en el servidor aunque el formulario ya lo haya hecho.
 
 Los tipos del API se generarán desde OpenAPI ([ADR 0012](../../docs/adr/0012-contrato-front-back.md)).
 

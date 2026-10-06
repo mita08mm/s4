@@ -6,9 +6,11 @@ knowledge: the mapping to status codes lives in `s4.shared.http.error_handlers`.
 
 
 class DomainError(Exception):
-    def __init__(self, detail: str) -> None:
+    def __init__(self, detail: str, *, field: str | None = None) -> None:
+        """`field` names the input field that caused the error, when there is one."""
         super().__init__(detail)
         self.detail = detail
+        self.field = field
 
 
 class NotFoundError(DomainError):

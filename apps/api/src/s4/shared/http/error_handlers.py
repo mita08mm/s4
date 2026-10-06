@@ -26,7 +26,10 @@ UNIQUE_VIOLATION = "23505"
 async def handle_domain_error(request: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, DomainError)
     status = DOMAIN_ERROR_STATUS.get(type(exc), 400)
-    return problem_response(request, status, exc.detail)
+    if exc.field is None:
+        return problem_response(request, status, exc.detail)
+    errors = [{"field": exc.field, "message": exc.detail}]
+    return problem_response(request, status, exc.detail, errors=errors)
 
 
 async def handle_validation_error(request: Request, exc: Exception) -> JSONResponse:

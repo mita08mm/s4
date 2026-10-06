@@ -12,6 +12,14 @@ export type ProblemDetails = {
   errors?: { field: string; message: string }[];
 };
 
+/** Paginated list, as returned by every list endpoint. */
+export type Page<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+};
+
 export class ApiError extends Error {
   constructor(public readonly problem: ProblemDetails) {
     super(problem.detail ?? problem.title);
@@ -31,6 +39,9 @@ export async function apiFetch<T>(
 
   if (!response.ok) {
     throw new ApiError((await response.json()) as ProblemDetails);
+  }
+  if (response.status === 204) {
+    return undefined as T;
   }
   return (await response.json()) as T;
 }

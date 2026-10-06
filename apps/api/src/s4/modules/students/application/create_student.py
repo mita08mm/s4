@@ -22,9 +22,11 @@ class CreateStudent:
             email=normalize_email(data.email),
         )
         if await self._repository.code_exists(data.code):
-            raise ConflictError(f"Ya existe un estudiante con el código {data.code}.")
+            raise ConflictError(f"Ya existe un estudiante con el código {data.code}.", field="code")
         if await self._repository.email_exists(data.email):
-            raise ConflictError(f"Ya existe un estudiante con el email {data.email}.")
+            raise ConflictError(
+                f"Ya existe un estudiante con el email {data.email}.", field="email"
+            )
 
         student = await self._repository.add(data)
         await self._unit_of_work.commit()

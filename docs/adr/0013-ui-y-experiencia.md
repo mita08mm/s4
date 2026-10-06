@@ -1,6 +1,6 @@
 # ADR 0013 — Librerías de UI y experiencia de usuario
 
-**Estado:** Aceptada (formularios pendientes)
+**Estado:** Aceptada
 
 ## Contexto
 
@@ -22,7 +22,8 @@ Se evalúan usabilidad, navegación, formularios, feedback y claridad. Además, 
 | Números animados | `@number-flow/react` (como Skiper UI *skiper37*) | Instalado, para contadores |
 | Notificaciones | Sonner (`sonner` de shadcn) | Instalado |
 | Estados vacíos, tablas, paneles | `empty`, `table`, `sheet`, `dialog`, `field`, `input`, `kbd`, `badge`, `tooltip`, `skeleton` de shadcn | Instalado |
-| Formularios y validación | React Hook Form + Zod | Pendiente |
+| Formularios y validación | **React Hook Form + Zod** (`@hookform/resolvers`); campos con `Controller` y `useFormState`, que funcionan con React Compiler | Instalado |
+| Confirmaciones | `alert-dialog` de shadcn | Instalado |
 
 Reglas:
 

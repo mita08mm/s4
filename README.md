@@ -9,7 +9,7 @@ Sistema para administrar **estudiantes**, **clases** y sus **inscripciones**, co
 | Base de datos | PostgreSQL 18 |
 | Infraestructura | Docker Compose |
 
-> Estado: API de estudiantes completa. Clases, inscripciones y las pantallas de gestión están en desarrollo.
+> Estado: gestión de estudiantes completa (API e interfaz). Clases e inscripciones en desarrollo.
 
 ## Requisitos
 

@@ -1,28 +1,21 @@
-import { UsersIcon } from "lucide-react";
+import type { Metadata } from "next";
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/shared/ui/empty";
+import { StudentsView } from "@/features/students/components/students-view";
+import { listStudents } from "@/features/students/queries";
 
-export default function Page() {
+export const metadata: Metadata = { title: "Estudiantes · S4" };
+
+export default async function StudentsPage({
+  searchParams,
+}: PageProps<"/students">) {
+  const params = await searchParams;
+  const query = typeof params.q === "string" ? params.q.trim() : "";
+  const page = Math.max(1, Number(params.page) || 1);
+  const result = await listStudents({ query, page });
+
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 pt-36 pb-24">
-      <h1 className="text-4xl font-semibold tracking-tighter">Estudiantes</h1>
-      <Empty className="border border-dashed">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <UsersIcon />
-          </EmptyMedia>
-          <EmptyTitle>En construcción</EmptyTitle>
-          <EmptyDescription>
-            Esta sección se conecta cuando el API tenga sus endpoints.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 pt-32 pb-24 sm:pt-36">
+      <StudentsView result={result} query={query} />
     </main>
   );
 }
