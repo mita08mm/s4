@@ -1,0 +1,50 @@
+# Development overrides: dev images + hot reload via Compose Watch.
+#   make dev  (or: docker compose -f compose.yml -f compose.dev.yml up --build --watch)
+services:
+  db:
+    ports:
+      - "${DB_PORT:-55432}:5432"
+
+  migrate:
+    build:
+      target: dev
+    image: s4-api:dev
+
+  api:
+    build:
+      target: dev
+    image: s4-api:dev
+    environment:
+      ENVIRONMENT: development
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/api/src
+          target: /app/src
+        - action: sync
+          path: ./apps/api/tests
+          target: /app/tests
+        - action: sync
+          path: ./apps/api/alembic
+          target: /app/alembic
+        - action: rebuild
+          path: ./apps/api/pyproject.toml
+        - action: rebuild
+          path: ./apps/api/uv.lock
+
+  web:
+    build:
+      target: dev
+    image: s4-web:dev
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/web
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: ./apps/web/package.json
+        - action: rebuild
+          path: ./apps/web/pnpm-lock.yaml
