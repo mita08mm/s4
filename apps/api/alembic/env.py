@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from s4.shared.config import get_settings
+from s4.shared.database import models  # noqa: F401  (registers every table)
 from s4.shared.database.base import Base
 
 # this is the Alembic Config object, which provides
@@ -21,7 +22,6 @@ if config.config_file_name is not None:
 # The database URL comes from the validated application settings, never from alembic.ini.
 config.set_main_option("sqlalchemy.url", str(get_settings().database_url))
 
-# ORM models must be imported before this line so autogenerate can see their tables.
 target_metadata = Base.metadata
 
 

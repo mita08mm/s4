@@ -25,10 +25,11 @@ services:
       timeout: 3s
       retries: 10
 
-  # Runs the database migrations once and exits; the API only starts if it succeeds.
+  # Applies migrations and loads demo data (idempotent), then exits.
+  # The API only starts if it succeeds.
   migrate:
     <<: *api-base
-    command: ["alembic", "upgrade", "head"]
+    command: ["sh", "-c", "alembic upgrade head && python -m s4.shared.database.seed"]
     restart: "no"
     depends_on:
       db:

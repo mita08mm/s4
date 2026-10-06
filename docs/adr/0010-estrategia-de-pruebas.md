@@ -1,6 +1,6 @@
 # ADR 0010 — Estrategia de pruebas
 
-**Estado:** Propuesta
+**Estado:** Aceptada (Bruno y Playwright pendientes)
 
 ## Contexto
 
@@ -22,6 +22,14 @@ Se evalúan pruebas de funcionalidades críticas, casos de error y evidencia de 
 | **A. Testcontainers** | Cada ejecución crea una base limpia y aislada | Dentro de un contenedor necesita acceso al socket de Docker del host |
 | **B. Base de datos de test en Compose** (por ejemplo, `s4_test` en el servicio `db`) | Simple y sin acceso al socket de Docker | Hay que limpiar los datos entre tests (transacción revertida por test) |
 
-Recomendación: **B**, con cada test dentro de una transacción que se revierte al terminar.
+## Decisión
 
-Hoy existen tests de integración del esqueleto (health, formato de errores, documentación) que no requieren base de datos.
+Se adopta la **opción B** (`tests/integration/conftest.py`):
+
+- La base `<POSTGRES_DB>_test` se crea automáticamente en el servicio `db` si no existe, y su esquema se recrea al inicio de cada ejecución.
+- Cada test corre dentro de una transacción que se revierte al terminar. La sesión usa `join_transaction_mode="create_savepoint"`, así el `commit()` del caso de uso confirma solo un *savepoint* y los tests no se ven entre sí.
+- La app de test reemplaza la dependencia `get_session` por esa sesión (`dependency_overrides`).
+- `make api-test` levanta solo `db` y corre `pytest` en el contenedor del API.
+- Los tests unitarios usan dobles en memoria (`tests/unit/students/fakes.py`) que cumplen los puertos.
+
+El esquema de test se crea con `Base.metadata.create_all`; las migraciones se validan aparte, al aplicarse en el servicio `migrate`.

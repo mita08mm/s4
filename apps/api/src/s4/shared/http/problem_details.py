@@ -5,8 +5,33 @@ from typing import Any
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 PROBLEM_JSON = "application/problem+json"
+
+
+class FieldError(BaseModel):
+    field: str
+    message: str
+
+
+class ProblemDetails(BaseModel):
+    """Error body shared by every endpoint (documentation model)."""
+
+    type: str = "about:blank"
+    title: str
+    status: int
+    detail: str | None = None
+    instance: str | None = None
+    errors: list[FieldError] | None = None
+
+
+def problem_responses(*statuses: int) -> dict[int | str, dict[str, Any]]:
+    """OpenAPI `responses` entries documenting the given error statuses."""
+    return {
+        status: {"description": HTTPStatus(status).phrase, "model": ProblemDetails}
+        for status in statuses
+    }
 
 
 def problem_response(

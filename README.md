@@ -9,7 +9,7 @@ Sistema para administrar **estudiantes**, **clases** y sus **inscripciones**, co
 | Base de datos | PostgreSQL 18 |
 | Infraestructura | Docker Compose |
 
-> Estado: esqueleto inicial. La API y la interfaz se comunican de punta a punta; los módulos de estudiantes, clases e inscripciones están en desarrollo.
+> Estado: API de estudiantes completa. Clases, inscripciones y las pantallas de gestión están en desarrollo.
 
 ## Requisitos
 
@@ -32,6 +32,39 @@ make up
 | http://localhost:8000/health | Estado del API |
 
 Sin make: `cp .env.example .env && docker compose up --build`.
+
+## API
+
+Base: `http://localhost:8000/api/v1`. Referencia completa e interactiva en `/docs`.
+
+| Método | Ruta | Descripción | Respuestas |
+|---|---|---|---|
+| GET | `/students?q=&page=&size=` | Listar y buscar | 200, 422 |
+| POST | `/students` | Crear | 201 (+ `Location`), 409, 422 |
+| GET | `/students/{id}` | Obtener | 200, 404, 422 |
+| PATCH | `/students/{id}` | Actualizar (solo los campos enviados) | 200, 404, 409, 422 |
+| DELETE | `/students/{id}` | Eliminar (y sus inscripciones) | 204, 404, 422 |
+
+Ejemplo:
+
+```bash
+curl -X POST localhost:8000/api/v1/students \
+  -H 'content-type: application/json' \
+  -d '{"code":"A00200","first_name":"Ana","last_name":"Pérez","email":"ana@s4.edu"}'
+```
+
+**Errores:** todas las respuestas de error usan [Problem Details (RFC 9457)](https://www.rfc-editor.org/rfc/rfc9457), `application/problem+json`:
+
+```json
+{ "type": "about:blank", "title": "Conflict", "status": 409,
+  "detail": "Ya existe un estudiante con el código A00101.", "instance": "/api/v1/students" }
+```
+
+**Búsqueda (`q`):** el texto se divide en palabras y **cada palabra debe aparecer** en alguno de los campos (coincidencia parcial y sin distinguir mayúsculas). En estudiantes se busca en código, nombre, apellido y email: `ana pér` encuentra a "Ana Pérez". `%` y `_` se tratan como texto literal. No ignora tildes. Los resultados se paginan (`page` desde 1, `size` entre 1 y 100, por defecto 20) y se ordenan por apellido y nombre.
+
+**Unicidad:** el código y el email de un estudiante son únicos sin distinguir mayúsculas (se guardan normalizados). Un duplicado responde 409.
+
+**Datos de prueba:** al levantar, el servicio `migrate` aplica las migraciones y carga 12 estudiantes de ejemplo. Es idempotente.
 
 ## Comandos
 

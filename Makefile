@@ -35,7 +35,8 @@ clean: ## Stop everything and delete the database volume
 	$(COMPOSE_DEV) down -v --remove-orphans
 
 # ---------- api ----------
-api-test: .env ## Run backend tests
+api-test: .env ## Run backend tests (starts the database if needed)
+	$(COMPOSE_DEV) up -d --wait db
 	$(COMPOSE_DEV) run --rm --no-deps --build api pytest
 
 api-lint: .env ## Lint, format check and type check the backend
@@ -49,10 +50,11 @@ api-shell: .env ## Open a shell in the backend container
 
 migration: .env ## Create a migration from model changes: make migration m="add students"
 	@test -n "$(m)" || (echo 'Usage: make migration m="message"' && exit 1)
-	$(COMPOSE_DEV) run --rm $(AS_USER) -v ./apps/api/alembic:/app/alembic api alembic revision --autogenerate -m "$(m)"
+	$(COMPOSE_DEV) up -d --wait db
+	$(COMPOSE_DEV) run --rm --no-deps --build $(AS_USER) -e RUFF_CACHE_DIR=/tmp/ruff -v ./apps/api/alembic:/app/alembic api alembic revision --autogenerate -m "$(m)"
 
-migrate: .env ## Apply pending migrations
-	$(COMPOSE_DEV) run --rm migrate
+migrate: .env ## Apply pending migrations and load demo data
+	$(COMPOSE_DEV) run --rm --build migrate
 
 # ---------- web ----------
 web-lint: .env ## Lint and type check the frontend

@@ -6,7 +6,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 S4 – Super Simple Scheduling System: evaluación técnica Full Stack (especificación en `proyecto unido.md`; la puntuación está en su §6). Hay que gestionar estudiantes, clases y su relación muchos a muchos mediante una API REST y una interfaz web. El postulante debe poder defender todo el código y declarar el uso de IA: preferir código simple y explícito antes que abstracciones ingeniosas, y mantener commits pequeños y descriptivos (el historial se evalúa).
 
-Estado actual: esqueleto funcional de punta a punta (health, manejo de errores, documentación, Docker). Los módulos `students`, `classes` y `enrollments` existen como carpetas vacías, y el modelo de datos está propuesto en `docs/adr/0011-modelo-de-datos.md`.
+## Cómo trabajar con el usuario
+
+- **Nunca hacer commits, crear ramas ni hacer push.** El usuario hace todos los commits él mismo y no quiere al asistente como coautor. Se trabaja en una sola rama (`main`). Como mucho, sugerir el mensaje de commit (Conventional Commits).
+- El usuario escribe en español; responder en español. Tiene experiencia en TypeScript/Next.js; en Python, explicar los conceptos propios del ecosistema (Protocol, async, `Depends`, uv).
+- Quiere tecnologías modernas que impresionen, pero tiene que poder defender cada línea en la entrevista: explicar el porqué de las decisiones y avanzar por pasos.
+- Interfaz: minimalista, moderna y con mucha interacción y movimiento; nada que parezca una plantilla genérica.
+- No instalar nada en el host: todo corre en Docker (ver abajo).
+
+## Estado actual y próximos pasos
+
+Hecho:
+- Esqueleto de punta a punta: health, errores Problem Details, documentación Scalar en `/docs`, Docker Compose (`db → migrate → api → web`), Makefile, README, arquitectura y 14 ADR en `docs/adr/`.
+- Frontend: estructura base animada. Incluye `SpotlightNav`, `ThemeToggle` con revelado circular, paleta ⌘K, `ProgressiveBlur`, inicio con hero y tarjetas, y páginas `/students` y `/classes` como marcadores "En construcción".
+- Datos decididos (`docs/adr/0011-modelo-de-datos.md`): `Student` (`code`, nombre, apellido, email obligatorio y único), `Class` (`code`, título, descripción opcional), `Enrollment` (fecha), con cascada al eliminar e inscripción idempotente. Ids UUID v7; `code` en mayúsculas y email en minúsculas.
+- **Backend `students` completo** y es el molde a copiar para `classes`: dominio (dataclasses + `Protocol`), un caso de uso por archivo con `UnitOfWork.commit()` explícito, repositorio SQLAlchemy (búsqueda AND de ORs con `ILIKE` escapado), router en `/api/v1/students` con `problem_responses(...)`, providers en `container.py`, modelo registrado en `shared/database/models.py`, migración, seed idempotente (`migrate` corre `alembic upgrade head` + seed), tests unitarios con fakes en memoria y tests de integración contra `<db>_test` con rollback por test (ADR 0010).
+
+Siguiente (en este orden):
+1. Frontend `/students`: tabla con filas animadas, búsqueda con debounce reflejada en la URL, panel lateral (`sheet`) para crear y editar con React Hook Form + Zod, avisos con Sonner, confirmación al eliminar.
+2. `classes` (back + front) siguiendo el molde de `students`, y luego `enrollments` (inscribir varias clases a la vez, consultas en ambos sentidos).
+3. Pendientes: colección de Bruno (`bruno/`), tipos del front generados desde OpenAPI (ADR 0012), CI con GitHub Actions (ADR 0014), Playwright E2E.
+4. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
 
 ## Todo corre en Docker
 
@@ -20,7 +40,9 @@ El host solo tiene Docker y make: no ejecutar `uv`, `pnpm`, `python` ni `node` e
 - Un test puntual: `docker compose -f compose.yml -f compose.dev.yml run --rm --no-deps api pytest tests/ruta/test_x.py::test_nombre`.
 - Agregar una dependencia Python: editar `apps/api/pyproject.toml` y regenerar `uv.lock` en un contenedor uv (`ghcr.io/astral-sh/uv:<versión>-python3.14-trixie-slim`, montando `apps/api` con `-u $(id -u):$(id -g)`). En el front, lo mismo con `node:24-alpine` y `pnpm add`.
 
-Los comandos que escriben archivos en el host montan la carpeta y corren con el UID del usuario, para no dejar archivos de root. En el contenedor del API el entorno virtual está en `/opt/venv`, así que montar el código en `/app` no lo oculta. El Postgres de desarrollo se expone en el puerto 55432 del host, porque el 5432 lo ocupa otro proyecto del usuario.
+Los comandos que escriben archivos en el host montan la carpeta y corren con el UID del usuario, para no dejar archivos de root. En el contenedor del API el entorno virtual está en `/opt/venv`, así que montar el código en `/app` no lo oculta. El Postgres de desarrollo se expone en el puerto 55432 del host (configurable con `DB_PORT` en `.env`), para no chocar con otros Postgres locales. Docker puede no tener `buildx`: los Dockerfiles no usan funciones exclusivas de BuildKit.
+
+Para verificar la interfaz se usa Playwright en un contenedor contra la red de Compose, por ejemplo `docker run --rm --network s4_default -v <dir>:/shots mcr.microsoft.com/playwright:v1.63.0-noble ...` apuntando a `http://web:3000`, y se revisan las capturas.
 
 ## Arquitectura
 
@@ -33,7 +55,8 @@ Los comandos que escriben archivos en el host montan la carpeta y corren con el 
   - La URL de Alembic viene de `Settings`, nunca de `alembic.ini`. Los modelos ORM deben importarse en `alembic/env.py` para que autogenerate los vea.
 - **Frontend** (`apps/web`, Next.js 16 App Router + React 19 + Tailwind v4 + Biome, con pnpm). Detalle en `apps/web/ARCHITECTURE.md`.
   - `src/app` solo contiene rutas; la lógica va en `src/features/<feature>` y lo técnico en `src/shared`.
-  - Componentes de UI: shadcn/ui (Radix, preset Nova) con el tema `--vng-*` de VengeanceUI y componentes de Skiper UI, todos en `src/shared/ui/` (ver `docs/adr/0013-ui-y-experiencia.md`). Se agregan con `npx shadcn@<versión> add <componente>` dentro de un contenedor `node:24-alpine` (con `-e npm_config_store_dir=/tmp/pnpm-store` para no dejar la caché de pnpm en el repo, y `chown` al final). Revisar el código del componente antes de agregarlo, y mover a `src/shared/ui/` lo que llegue a otra ruta.
+  - Componentes de UI: shadcn/ui (Radix, preset Nova) con el tema `--vng-*` de VengeanceUI, componentes adaptados de Skiper UI y VengeanceUI, y Motion (`framer-motion`), todos en `src/shared/ui/` (ver `docs/adr/0013-ui-y-experiencia.md`). Los de esos registros son demos: hay que adaptarlos (rutas de Next, tokens del tema, sin imports inexistentes). Lenguaje de movimiento: entradas con fade + subida + desenfoque y curva `cubic-bezier(0.22, 1, 0.36, 1)`, interacciones con springs, y `MotionConfig reducedMotion="user"`. Catálogos: `https://skiper-ui.com/registry/registry.json` y `https://raw.githubusercontent.com/Ashutoshx7/VengeanceUI/main/public/r/registry.json`.
+  - `CommandDialog` de shadcn no crea el contexto de cmdk: su contenido debe ir envuelto en `<Command>`. Se agregan con `npx shadcn@<versión> add <componente>` dentro de un contenedor `node:24-alpine` (con `-e npm_config_store_dir=/tmp/pnpm-store` para no dejar la caché de pnpm en el repo, y `chown` al final). Revisar el código del componente antes de agregarlo, y mover a `src/shared/ui/` lo que llegue a otra ruta.
   - El navegador solo habla con Next.js. Server Components y Server Actions llaman al API mediante `shared/lib/api-client.ts`, con `API_INTERNAL_URL` (módulo marcado `server-only`).
   - Next.js 16 tiene cambios de API: antes de usar una API que no conozcas, consulta `node_modules/next/dist/docs/` dentro del contenedor (ver `apps/web/AGENTS.md`).
 

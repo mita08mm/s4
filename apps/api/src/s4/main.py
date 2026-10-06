@@ -2,10 +2,13 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from scalar_fastapi import get_scalar_api_reference
 
+from s4.modules.students.http.router import router as students_router
 from s4.shared.config import get_settings
 from s4.shared.http import health
 from s4.shared.http.error_handlers import register_error_handlers
 from s4.shared.logging import configure_logging
+
+API_PREFIX = "/api/v1"
 
 
 def create_app() -> FastAPI:
@@ -20,6 +23,7 @@ def create_app() -> FastAPI:
     )
     register_error_handlers(app)
     app.include_router(health.router)
+    app.include_router(students_router, prefix=API_PREFIX)
 
     @app.get("/docs", include_in_schema=False)
     async def api_reference() -> HTMLResponse:

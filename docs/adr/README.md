@@ -15,8 +15,8 @@ Cada ADR documenta una decisión técnica: el contexto, lo que se decidió, las 
 | [0007](0007-errores-problem-details.md) | Errores con Problem Details (RFC 9457) | Aceptada |
 | [0008](0008-herramientas-de-calidad.md) | Herramientas de calidad: uv, Ruff, mypy, Biome | Aceptada |
 | [0009](0009-documentacion-del-api.md) | Documentación del API: OpenAPI + Scalar + Bruno | Aceptada |
-| [0010](0010-estrategia-de-pruebas.md) | Estrategia de pruebas | Propuesta |
-| [0011](0011-modelo-de-datos.md) | Modelo de datos, integridad y búsqueda | Propuesta |
+| [0010](0010-estrategia-de-pruebas.md) | Estrategia de pruebas | Aceptada |
+| [0011](0011-modelo-de-datos.md) | Modelo de datos, integridad y búsqueda | Aceptada |
 | [0012](0012-contrato-front-back.md) | Contrato front–back y tipos generados | Propuesta |
-| [0013](0013-ui-y-experiencia.md) | Librerías de UI y experiencia de usuario | Propuesta |
+| [0013](0013-ui-y-experiencia.md) | Librerías de UI y experiencia de usuario | Aceptada |
 | [0014](0014-integracion-continua.md) | Integración continua con GitHub Actions | Propuesta |

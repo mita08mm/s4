@@ -79,6 +79,8 @@ apps/api/
 │   │
 │   ├── shared/
 │   │   ├── errors.py                              # DomainError, NotFoundError, ConflictError...
+│   │   ├── pagination.py                          # Page[T]
+│   │   ├── unit_of_work.py                        # puerto UnitOfWork (Protocol)
 │   │   ├── logging.py                             # configuración de structlog
 │   │   ├── http/
 │   │   │   ├── problem_details.py                 # respuestas RFC 9457
@@ -87,7 +89,10 @@ apps/api/
 │   │   ├── database/
 │   │   │   ├── base.py                            # DeclarativeBase + convención de nombres
 │   │   │   ├── session.py                         # engine y sesión async
-│   │   │   └── seed.py                            # datos de prueba (pendiente)
+│   │   │   ├── models.py                          # registro de modelos ORM (lo usa Alembic)
+│   │   │   ├── search.py                          # patrón ILIKE con comodines escapados
+│   │   │   ├── unit_of_work.py                    # adaptador SqlAlchemyUnitOfWork
+│   │   │   └── seed.py                            # datos de demostración (idempotente)
 │   │   └── config.py                              # settings validadas (pydantic-settings)
 │   │
 │   ├── container.py                               # composition root (providers de Depends)
@@ -119,23 +124,29 @@ Se usa el *src layout* (`src/s4/`) para que los tests importen el paquete instal
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 
-def get_create_student(session: SessionDep) -> CreateStudent:
-    return CreateStudent(SqlAlchemyStudentRepository(session))
+def get_student_repository(session: SessionDep) -> StudentRepository:
+    return SqlAlchemyStudentRepository(session)
+
+def get_create_student(repository: StudentRepositoryDep, uow: UnitOfWorkDep) -> CreateStudent:
+    return CreateStudent(repository, uow)
 ```
 
 ```python
 # application/create_student.py (ilustrativo)
 class CreateStudent:
-    def __init__(self, repository: StudentRepository) -> None:  # recibe el PUERTO
-        self._repository = repository
+    def __init__(self, repository: StudentRepository, unit_of_work: UnitOfWork) -> None:
+        self._repository = repository      # recibe PUERTOS, no implementaciones
+        self._unit_of_work = unit_of_work
 
     async def execute(self, data: NewStudent) -> Student:
-        if await self._repository.exists_by_student_id(data.student_id):
-            raise ConflictError(f"Student {data.student_id} already exists")
-        return await self._repository.add(data)
+        if await self._repository.code_exists(data.code):
+            raise ConflictError(f"Ya existe un estudiante con el código {data.code}.")
+        student = await self._repository.add(data)
+        await self._unit_of_work.commit()  # el caso de uso decide la transacción
+        return student
 ```
 
-Cada request obtiene su propia sesión de base de datos, que se cierra al terminar y revierte cualquier cambio no confirmado. Dónde se confirma la transacción (commit) se define junto con el modelo de datos ([ADR 0011](../../docs/adr/0011-modelo-de-datos.md)).
+Cada request obtiene su propia sesión de base de datos. Los repositorios nunca confirman: el caso de uso llama a `UnitOfWork.commit()` (puerto en `shared/unit_of_work.py`, adaptador en `shared/database/unit_of_work.py`) cuando terminó todos sus cambios. Si lanza un error antes, la sesión se cierra sin confirmar nada ([ADR 0011](../../docs/adr/0011-modelo-de-datos.md)).
 
 ## 5. Flujo de una petición
 
@@ -150,10 +161,10 @@ sequenceDiagram
     participant D as infrastructure/SqlAlchemyStudentRepository
     participant DB as PostgreSQL
 
-    C->>R: POST /students {student_id, first_name, last_name}
+    C->>R: POST /api/v1/students {code, first_name, last_name, email}
     R->>R: Pydantic valida el body (falla → 422)
     R->>U: execute(data)
-    U->>P: exists_by_student_id(student_id)
+    U->>P: code_exists(code)
     P->>D: (implementación)
     D->>DB: SELECT
     alt ya existe
@@ -162,6 +173,7 @@ sequenceDiagram
     else no existe
         U->>P: add(data)
         D->>DB: INSERT
+        U->>U: unit_of_work.commit()
         U-->>R: Student
         R-->>C: 201 Created
     end
@@ -227,7 +239,7 @@ El entorno virtual vive en `/opt/venv`, fuera de `/app`, para que montar el cód
 1. Crear `src/s4/modules/<modulo>/` con las carpetas `domain`, `application`, `infrastructure` y `http`.
 2. Definir la entidad y el puerto en `domain`.
 3. Implementar los casos de uso en `application` (con sus tests unitarios).
-4. Crear el modelo ORM en `infrastructure` y generar la migración con Alembic.
+4. Crear el modelo ORM en `infrastructure`, registrarlo en `shared/database/models.py` y generar la migración con `make migration m="..."`.
 5. Implementar el adaptador en `infrastructure`.
 6. Crear los schemas y el router en `http`.
 7. Registrar los providers en `container.py` y el router en `main.py`.
