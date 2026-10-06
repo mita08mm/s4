@@ -185,3 +185,10 @@
     @apply font-sans;
   }
 }
+
+/* Theme switch: the new theme is revealed with a circular clip-path (see ThemeToggle). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}

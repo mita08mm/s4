@@ -31,11 +31,13 @@ apps/web/
 │   │   ├── layout.tsx
 │   │   └── page.tsx
 │   ├── features/                 # una carpeta por funcionalidad
+│   │   ├── home/                 #   components/ (hero, tarjetas), queries.ts
 │   │   ├── students/             #   components/, actions.ts, queries.ts, schemas.ts
 │   │   ├── classes/
 │   │   └── enrollments/
 │   └── shared/                   # piezas técnicas reutilizables
 │       ├── config/server-env.ts  #   configuración de servidor (server-only)
+│       ├── layout/               #   providers, encabezado, paleta ⌘K
 │       ├── lib/
 │       │   ├── api-client.ts     #   fetch tipado al API + ProblemDetails
 │       │   └── utils.ts          #   cn() para unir clases de Tailwind
