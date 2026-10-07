@@ -33,7 +33,7 @@ apps/web/
 │   ├── features/                 # una carpeta por funcionalidad
 │   │   ├── home/                 #   components/ (hero, tarjetas), queries.ts
 │   │   ├── students/             #   components/, actions.ts, queries.ts, schemas.ts, types.ts
-│   │   ├── classes/
+│   │   ├── classes/              #   misma estructura; vista en grilla de tarjetas
 │   │   └── enrollments/
 │   └── shared/                   # piezas técnicas reutilizables
 │       ├── config/server-env.ts  #   configuración de servidor (server-only)

@@ -8,6 +8,7 @@ import asyncio
 import structlog
 from sqlalchemy.dialects.postgresql import insert
 
+from s4.modules.classes.infrastructure.class_model import ClassModel
 from s4.modules.students.infrastructure.student_model import StudentModel
 from s4.shared.database.session import get_engine, get_sessionmaker
 
@@ -28,6 +29,17 @@ STUDENTS = [
     ("A00112", "Nicolás", "Silva", "nicolas.silva@s4.edu"),
 ]
 
+CLASSES = [
+    ("MAT-101", "Matemáticas I", "Álgebra, funciones y una introducción al cálculo."),
+    ("FIS-101", "Física I", "Mecánica clásica: cinemática, dinámica y energía."),
+    ("QUI-101", "Química General", "Estructura atómica, enlaces y reacciones."),
+    ("PRG-101", "Programación I", "Fundamentos de programación con Python."),
+    ("PRG-201", "Estructuras de Datos", "Listas, árboles, grafos y análisis de complejidad."),
+    ("BDD-201", "Bases de Datos", "Modelo relacional, SQL y normalización."),
+    ("HIS-101", "Historia del Arte", None),
+    ("ING-101", "Inglés Técnico", "Lectura y escritura de documentación técnica."),
+]
+
 
 async def seed() -> None:
     async with get_sessionmaker()() as session:
@@ -41,9 +53,19 @@ async def seed() -> None:
             )
             .on_conflict_do_nothing()
         )
+        await session.execute(
+            insert(ClassModel)
+            .values(
+                [
+                    {"code": code, "title": title, "description": description}
+                    for code, title, description in CLASSES
+                ]
+            )
+            .on_conflict_do_nothing()
+        )
         await session.commit()
     await get_engine().dispose()
-    logger.info("seed_completed", students=len(STUDENTS))
+    logger.info("seed_completed", students=len(STUDENTS), classes=len(CLASSES))
 
 
 if __name__ == "__main__":

@@ -11,6 +11,15 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from s4.modules.classes.application.create_class import CreateClass
+from s4.modules.classes.application.delete_class import DeleteClass
+from s4.modules.classes.application.get_class import GetClass
+from s4.modules.classes.application.search_classes import SearchClasses
+from s4.modules.classes.application.update_class import UpdateClass
+from s4.modules.classes.domain.class_repository import ClassRepository
+from s4.modules.classes.infrastructure.sqlalchemy_class_repository import (
+    SqlAlchemyClassRepository,
+)
 from s4.modules.students.application.create_student import CreateStudent
 from s4.modules.students.application.delete_student import DeleteStudent
 from s4.modules.students.application.get_student import GetStudent
@@ -60,3 +69,31 @@ def get_update_student(repository: StudentRepositoryDep, uow: UnitOfWorkDep) -> 
 
 def get_delete_student(repository: StudentRepositoryDep, uow: UnitOfWorkDep) -> DeleteStudent:
     return DeleteStudent(repository, uow)
+
+
+# ---------- classes ----------
+def get_class_repository(session: SessionDep) -> ClassRepository:
+    return SqlAlchemyClassRepository(session)
+
+
+ClassRepositoryDep = Annotated[ClassRepository, Depends(get_class_repository)]
+
+
+def get_search_classes(repository: ClassRepositoryDep) -> SearchClasses:
+    return SearchClasses(repository)
+
+
+def get_get_class(repository: ClassRepositoryDep) -> GetClass:
+    return GetClass(repository)
+
+
+def get_create_class(repository: ClassRepositoryDep, uow: UnitOfWorkDep) -> CreateClass:
+    return CreateClass(repository, uow)
+
+
+def get_update_class(repository: ClassRepositoryDep, uow: UnitOfWorkDep) -> UpdateClass:
+    return UpdateClass(repository, uow)
+
+
+def get_delete_class(repository: ClassRepositoryDep, uow: UnitOfWorkDep) -> DeleteClass:
+    return DeleteClass(repository, uow)

@@ -24,11 +24,12 @@ Hecho:
 
 - **Frontend `/students` completo** y es el molde para `/classes`: la página (Server Component) lee `searchParams` y llama a `features/students/queries.ts`; `StudentsView` (cliente) une la búsqueda con debounce en `?q=`, la tabla con filas animadas (`motion.create(TableRow)`), la paginación (`shared/ui/pagination-links.tsx`), el panel `StudentSheet` (React Hook Form + Zod con `Controller` y `useFormState`, compatibles con React Compiler) y el `DeleteStudentDialog`. Las escrituras son Server Actions en `features/students/actions.ts`: validan de nuevo con el mismo esquema Zod, llaman al API, traducen Problem Details a errores por campo (el 409 trae `errors[].field`) y llaman a `refresh()`. Atajo `N` para crear. `loading.tsx` y `error.tsx` (en Next 16 la prop es `retry`, no `reset`).
 
+- **`classes` completo** (back + front). Entidad `SchoolClass`; `SchoolClassChanges.description` usa el centinela `UNSET` (omitida = conservar, `null` = borrar). En el front se muestra como grilla de tarjetas (`ClassesGrid`); el buscador es genérico (`shared/ui/url-search-input.tsx`) y el detector de escritura para atajos está en `shared/lib/keyboard.ts`. Seed: 12 estudiantes y 8 clases. 31 tests de backend.
+
 Siguiente (en este orden):
-1. `classes` (back + front) siguiendo el molde de `students`.
-2. `enrollments`: inscribir varias clases a la vez, consultas en ambos sentidos, y detalle de estudiante y de clase con sus inscripciones.
-3. Pendientes: colección de Bruno (`bruno/`), tipos del front generados desde OpenAPI (ADR 0012), CI con GitHub Actions (ADR 0014), Playwright E2E.
-4. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
+1. `enrollments`: inscribir varias clases a la vez, consultas en ambos sentidos, y detalle de estudiante y de clase con sus inscripciones.
+2. Pendientes: colección de Bruno (`bruno/`), tipos del front generados desde OpenAPI (ADR 0012), CI con GitHub Actions (ADR 0014), Playwright E2E.
+3. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
 
 ## Todo corre en Docker
 

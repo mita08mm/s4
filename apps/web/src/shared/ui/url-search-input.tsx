@@ -9,8 +9,24 @@ import { Spinner } from "@/shared/ui/spinner";
 
 const DEBOUNCE_MS = 300;
 
+/** How the API search behaves (see the README). */
+export const SEARCH_HINT =
+  "Sin distinguir mayúsculas. Con varias palabras, cada una debe aparecer en algún campo.";
+
+type UrlSearchInputProps = {
+  defaultValue: string;
+  placeholder: string;
+  label: string;
+  hint?: string;
+};
+
 /** Search box that keeps the query in the URL (`?q=`), so results can be shared. */
-export function StudentSearch({ defaultValue }: { defaultValue: string }) {
+export function UrlSearchInput({
+  defaultValue,
+  placeholder,
+  label,
+  hint,
+}: UrlSearchInputProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -41,18 +57,15 @@ export function StudentSearch({ defaultValue }: { defaultValue: string }) {
           type="search"
           defaultValue={defaultValue}
           onChange={(event) => search(event.target.value)}
-          placeholder="Buscar por código, nombre, apellido o email…"
-          aria-label="Buscar estudiantes"
+          placeholder={placeholder}
+          aria-label={label}
           className="h-11 rounded-xl pr-10 pl-10 text-base md:text-sm"
         />
         {isPending && (
           <Spinner className="absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
         )}
       </div>
-      <p className="px-1 text-xs text-muted-foreground">
-        Sin distinguir mayúsculas. Con varias palabras, cada una debe aparecer
-        en algún campo.
-      </p>
+      {hint && <p className="px-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

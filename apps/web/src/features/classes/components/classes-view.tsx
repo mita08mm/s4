@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { DeleteStudentDialog } from "@/features/students/components/delete-student-dialog";
-import { StudentSheet } from "@/features/students/components/student-sheet";
-import { StudentsTable } from "@/features/students/components/students-table";
-import type { Student } from "@/features/students/types";
+import { ClassSheet } from "@/features/classes/components/class-sheet";
+import { ClassesGrid } from "@/features/classes/components/classes-grid";
+import { DeleteClassDialog } from "@/features/classes/components/delete-class-dialog";
+import type { SchoolClass } from "@/features/classes/types";
 import type { Page } from "@/shared/lib/api-client";
 import { isTyping } from "@/shared/lib/keyboard";
 import { Button } from "@/shared/ui/button";
@@ -16,23 +16,20 @@ import { Kbd } from "@/shared/ui/kbd";
 import { PaginationLinks } from "@/shared/ui/pagination-links";
 import { SEARCH_HINT, UrlSearchInput } from "@/shared/ui/url-search-input";
 
-type StudentsViewProps = {
-  result: Page<Student>;
+type ClassesViewProps = {
+  result: Page<SchoolClass>;
   query: string;
 };
 
-// The selected student is kept after closing, so the content does not
-// disappear while the panel or dialog animates out.
-type Selection = { open: boolean; student: Student | null };
-const CLOSED: Selection = { open: false, student: null };
+// Kept after closing so the content does not vanish during the exit animation.
+type Selection = { open: boolean; schoolClass: SchoolClass | null };
+const CLOSED: Selection = { open: false, schoolClass: null };
 
-export function StudentsView({ result, query }: StudentsViewProps) {
+export function ClassesView({ result, query }: ClassesViewProps) {
   const [editor, setEditor] = useState<Selection>(CLOSED);
   const [deletion, setDeletion] = useState<Selection>(CLOSED);
 
-  const openCreate = () => setEditor({ open: true, student: null });
-  const openEdit = (student: Student) => setEditor({ open: true, student });
-  const openDelete = (student: Student) => setDeletion({ open: true, student });
+  const openCreate = () => setEditor({ open: true, schoolClass: null });
 
   // "N" opens the create panel from anywhere on the page.
   useEffect(() => {
@@ -46,7 +43,7 @@ export function StudentsView({ result, query }: StudentsViewProps) {
         return;
       if (isTyping(event.target)) return;
       event.preventDefault();
-      setEditor({ open: true, student: null });
+      setEditor({ open: true, schoolClass: null });
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -55,7 +52,7 @@ export function StudentsView({ result, query }: StudentsViewProps) {
   const hrefFor = (page: number) => {
     const params = new URLSearchParams({ page: String(page) });
     if (query) params.set("q", query);
-    return `/students?${params}`;
+    return `/classes?${params}`;
   };
 
   return (
@@ -68,7 +65,7 @@ export function StudentsView({ result, query }: StudentsViewProps) {
       >
         <div>
           <h1 className="text-4xl font-semibold tracking-tighter sm:text-5xl">
-            Estudiantes
+            Clases
           </h1>
           <p className="mt-2 text-muted-foreground">
             <NumberFlow
@@ -84,24 +81,24 @@ export function StudentsView({ result, query }: StudentsViewProps) {
         </div>
         <Button onClick={openCreate} size="lg" className="rounded-full pr-2.5">
           <PlusIcon />
-          Nuevo estudiante
+          Nueva clase
           <Kbd className="ml-1 bg-background/20 text-primary-foreground">N</Kbd>
         </Button>
       </motion.header>
 
       <UrlSearchInput
         defaultValue={query}
-        label="Buscar estudiantes"
-        placeholder="Buscar por código, nombre, apellido o email…"
+        label="Buscar clases"
+        placeholder="Buscar por código, título o descripción…"
         hint={SEARCH_HINT}
       />
 
-      <StudentsTable
-        students={result.items}
+      <ClassesGrid
+        classes={result.items}
         query={query}
         onCreate={openCreate}
-        onEdit={openEdit}
-        onDelete={openDelete}
+        onEdit={(schoolClass) => setEditor({ open: true, schoolClass })}
+        onDelete={(schoolClass) => setDeletion({ open: true, schoolClass })}
       />
 
       <PaginationLinks
@@ -111,14 +108,14 @@ export function StudentsView({ result, query }: StudentsViewProps) {
         hrefFor={hrefFor}
       />
 
-      <StudentSheet
+      <ClassSheet
         open={editor.open}
-        student={editor.student}
+        schoolClass={editor.schoolClass}
         onOpenChange={(open) => setEditor((current) => ({ ...current, open }))}
       />
-      <DeleteStudentDialog
+      <DeleteClassDialog
         open={deletion.open}
-        student={deletion.student}
+        schoolClass={deletion.schoolClass}
         onOpenChange={(open) =>
           setDeletion((current) => ({ ...current, open }))
         }

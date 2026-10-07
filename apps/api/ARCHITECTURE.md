@@ -127,6 +127,7 @@ SessionDep = Annotated[AsyncSession, Depends(get_session)]
 def get_student_repository(session: SessionDep) -> StudentRepository:
     return SqlAlchemyStudentRepository(session)
 
+
 def get_create_student(repository: StudentRepositoryDep, uow: UnitOfWorkDep) -> CreateStudent:
     return CreateStudent(repository, uow)
 ```
@@ -135,7 +136,7 @@ def get_create_student(repository: StudentRepositoryDep, uow: UnitOfWorkDep) -> 
 # application/create_student.py (ilustrativo)
 class CreateStudent:
     def __init__(self, repository: StudentRepository, unit_of_work: UnitOfWork) -> None:
-        self._repository = repository      # recibe PUERTOS, no implementaciones
+        self._repository = repository  # recibe PUERTOS, no implementaciones
         self._unit_of_work = unit_of_work
 
     async def execute(self, data: NewStudent) -> Student:

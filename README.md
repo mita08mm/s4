@@ -9,7 +9,7 @@ Sistema para administrar **estudiantes**, **clases** y sus **inscripciones**, co
 | Base de datos | PostgreSQL 18 |
 | Infraestructura | Docker Compose |
 
-> Estado: gestión de estudiantes completa (API e interfaz). Clases e inscripciones en desarrollo.
+> Estado: gestión de estudiantes y clases completa (API e interfaz). Inscripciones en desarrollo.
 
 ## Requisitos
 
@@ -44,6 +44,11 @@ Base: `http://localhost:8000/api/v1`. Referencia completa e interactiva en `/doc
 | GET | `/students/{id}` | Obtener | 200, 404, 422 |
 | PATCH | `/students/{id}` | Actualizar (solo los campos enviados) | 200, 404, 409, 422 |
 | DELETE | `/students/{id}` | Eliminar (y sus inscripciones) | 204, 404, 422 |
+| GET | `/classes?q=&page=&size=` | Listar y buscar | 200, 422 |
+| POST | `/classes` | Crear | 201 (+ `Location`), 409, 422 |
+| GET | `/classes/{id}` | Obtener | 200, 404, 422 |
+| PATCH | `/classes/{id}` | Actualizar; `"description": null` la borra | 200, 404, 409, 422 |
+| DELETE | `/classes/{id}` | Eliminar (y sus inscripciones) | 204, 404, 422 |
 
 Ejemplo:
 
@@ -60,11 +65,11 @@ curl -X POST localhost:8000/api/v1/students \
   "detail": "Ya existe un estudiante con el código A00101.", "instance": "/api/v1/students" }
 ```
 
-**Búsqueda (`q`):** el texto se divide en palabras y **cada palabra debe aparecer** en alguno de los campos (coincidencia parcial y sin distinguir mayúsculas). En estudiantes se busca en código, nombre, apellido y email: `ana pér` encuentra a "Ana Pérez". `%` y `_` se tratan como texto literal. No ignora tildes. Los resultados se paginan (`page` desde 1, `size` entre 1 y 100, por defecto 20) y se ordenan por apellido y nombre.
+**Búsqueda (`q`):** el texto se divide en palabras y **cada palabra debe aparecer** en alguno de los campos (coincidencia parcial y sin distinguir mayúsculas). En estudiantes se busca en código, nombre, apellido y email (`ana pér` encuentra a "Ana Pérez"); en clases, en código, título y descripción (`mecánica` encuentra "Física I"). `%` y `_` se tratan como texto literal. No ignora tildes. Los resultados se paginan (`page` desde 1, `size` entre 1 y 100, por defecto 20) y se ordenan por apellido y nombre (estudiantes) o por código (clases).
 
-**Unicidad:** el código y el email de un estudiante son únicos sin distinguir mayúsculas (se guardan normalizados). Un duplicado responde 409.
+**Unicidad:** el código y el email de un estudiante, y el código de una clase, son únicos sin distinguir mayúsculas (se guardan normalizados). Un duplicado responde 409 e indica el campo en `errors`.
 
-**Datos de prueba:** al levantar, el servicio `migrate` aplica las migraciones y carga 12 estudiantes de ejemplo. Es idempotente.
+**Datos de prueba:** al levantar, el servicio `migrate` aplica las migraciones y carga 12 estudiantes y 8 clases de ejemplo. Es idempotente.
 
 ## Comandos
 

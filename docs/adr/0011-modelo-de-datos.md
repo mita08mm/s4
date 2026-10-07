@@ -1,6 +1,6 @@
 # ADR 0011 — Modelo de datos, integridad y búsqueda
 
-**Estado:** Aceptada (implementado: `students`; pendiente: `classes`, `enrollments`)
+**Estado:** Aceptada (implementado: `students`, `classes`; pendiente: `enrollments`)
 
 ## Contexto
 
@@ -19,7 +19,9 @@ created_at, updated_at
 ```
 
 - **Campos de `Student`** (el enunciado no los define): `code`, nombre, apellido y **email obligatorio y único**. Se usa `code` (no `student_id`) para no confundirlo con la columna `student_id` de `enrollments`, y por simetría con `classes.code`. El email hace la búsqueda más útil y es un segundo caso de duplicado que la API debe rechazar con 409.
-- **`description` de la clase es opcional.** El enunciado exige mostrar código, título y descripción, no que la descripción sea obligatoria.
+- **Nombre interno `SchoolClass`:** en Python la entidad de clase se llama `SchoolClass` (`class Class:` se lee confuso); la tabla y la API siguen siendo `classes`.
+- **`description` de la clase es opcional:** el enunciado exige mostrar código, título y descripción, no que la descripción sea obligatoria. En un `PATCH`, omitirla la conserva y enviarla como `null` la borra. El dominio distingue ambos casos con el centinela `UNSET` (`SchoolClassChanges`). Una descripción en blanco se guarda como `NULL`.
+- **Validaciones de `Class`:** `code` con las mismas reglas que el de estudiante; `title` de 1 a 150 caracteres; `description` de hasta 1000.
 - **Identificador técnico separado del de negocio** (`code`): el código visible se puede editar sin romper relaciones. El id es **UUID v7** (`uuid.uuid7` de Python 3.14): es ordenable por tiempo, así los registros nuevos se agregan al final del índice de la clave primaria.
 - **Normalización:** `code` se guarda en mayúsculas y `email` en minúsculas, así la unicidad no distingue mayúsculas.
 - **Duplicados:** `UNIQUE` en `student_id` y `code`; clave primaria compuesta en `enrollments` para impedir inscripciones repetidas. Inscribir dos veces es idempotente (`PUT`).
