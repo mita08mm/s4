@@ -1,0 +1,15 @@
+meta {
+  name: Delete student
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/students/{{studentId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 204
+}

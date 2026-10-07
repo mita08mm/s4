@@ -42,9 +42,12 @@ s4/
 ├── apps/
 │   ├── api/              # backend (Python, Clean Architecture por módulos)
 │   └── web/              # frontend (Next.js, organizado por features)
+├── bruno/                # colección de requests del API (Bruno)
+├── e2e/                  # tests end-to-end (Playwright)
 ├── docs/
 │   ├── ARCHITECTURE.md   # este documento
 │   └── adr/              # registro de decisiones
+├── .github/workflows/    # CI (GitHub Actions)
 ├── compose.yml           # sistema completo con imágenes de producción
 ├── compose.dev.yml       # overrides de desarrollo (hot reload)
 ├── Makefile              # comandos del proyecto (todos corren en Docker)

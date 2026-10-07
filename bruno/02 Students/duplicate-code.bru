@@ -1,0 +1,26 @@
+meta {
+  name: Duplicated code is 409
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/students
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "code": "BRU-{{runId}}",
+    "first_name": "Otro",
+    "last_name": "Estudiante",
+    "email": "otro.{{runId}}@s4.edu"
+  }
+}
+
+assert {
+  res.status: eq 409
+  res.headers["content-type"]: eq application/problem+json
+  res.body.errors[0].field: eq code
+}

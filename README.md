@@ -1,5 +1,7 @@
 # S4 — Super Simple Scheduling System
 
+[![CI](https://github.com/mita08mm/s4/actions/workflows/ci.yml/badge.svg)](https://github.com/mita08mm/s4/actions/workflows/ci.yml)
+
 Sistema para administrar **estudiantes**, **clases** y sus **inscripciones**, con una API REST y una interfaz web.
 
 | | |
@@ -18,7 +20,7 @@ Solo **Docker** (con Docker Compose v2) y **make**. No hace falta instalar Pytho
 ## Inicio rápido
 
 ```bash
-git clone <repo> s4 && cd s4
+git clone https://github.com/mita08mm/s4.git && cd s4
 make up
 ```
 
@@ -32,6 +34,18 @@ make up
 | http://localhost:8000/health | Estado del API |
 
 Sin make: `cp .env.example .env && docker compose up --build`.
+
+## Interfaz
+
+| Pantalla | Qué permite |
+|---|---|
+| Inicio `/` | Estado del API y acceso a cada sección |
+| Estudiantes `/students` | Listar, buscar (la búsqueda queda en la URL), paginar, crear y editar en un panel lateral, eliminar con confirmación |
+| Detalle `/students/[id]` | Datos del estudiante y sus clases; inscribirlo en varias a la vez o desinscribirlo |
+| Clases `/classes` | Lo mismo para clases, en una grilla de tarjetas con código, título y descripción |
+| Detalle `/classes/[id]` | Datos de la clase y sus estudiantes; inscribir varios a la vez o desinscribirlos |
+
+Atajos: `⌘K` / `Ctrl+K` abre la paleta de comandos y `N` crea un estudiante o una clase. Los formularios validan al instante y muestran los errores del servidor (por ejemplo, un código duplicado) junto al campo. Todas las acciones confirman con un aviso. Hay modo claro y oscuro, y las animaciones respetan la preferencia de "reducir movimiento" del sistema.
 
 ## API
 
@@ -96,12 +110,28 @@ Ejecuta `make` (o `make help`) para ver la lista completa.
 | `make migration m="mensaje"` | Genera una migración a partir de los modelos |
 | `make migrate` | Aplica las migraciones pendientes |
 | `make web-lint` / `make web-format` | Lint y tipos / autoformato del frontend |
+| `make api-collection` | Colección de Bruno contra el API en ejecución |
+| `make e2e` | Tests end-to-end con Playwright contra el sistema en ejecución |
 
 Para correr un test puntual del backend:
 
 ```bash
 docker compose -f compose.yml -f compose.dev.yml run --rm --no-deps api pytest tests/integration/test_http_basics.py::test_liveness_returns_ok
 ```
+
+## Pruebas
+
+| Tipo | Herramienta | Qué cubre | Comando |
+|---|---|---|---|
+| Unitarias | pytest | Casos de uso con repositorios en memoria: normalización, duplicados, inscripción atómica | `make api-test` |
+| Integración | pytest + httpx | Cada endpoint contra PostgreSQL real (base `<db>_test`, transacción revertida por test): códigos HTTP, errores, búsqueda, paginación, cascadas | `make api-test` |
+| Colección del API | [Bruno](https://www.usebruno.com/) (`bruno/`) | Recorrido completo del API con assertions; se puede abrir en la app de Bruno para probar a mano | `make api-collection` |
+| End-to-end | Playwright (`e2e/`) | Flujos reales en el navegador: crear, buscar, editar, eliminar, validaciones, inscribir varias clases, desinscribir, ⌘K, tema | `make e2e` |
+| Estáticas | Ruff, mypy (strict), Biome, tsc | Estilo, errores comunes y tipos en back y front | `make check` |
+
+`make api-collection` y `make e2e` necesitan el sistema levantado (`make up`). Ambos crean sus propios datos con códigos únicos y los eliminan al terminar.
+
+**CI:** GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) ejecuta `make check` y luego levanta el sistema y corre la colección de Bruno y los tests E2E, con los mismos comandos que en local.
 
 ## Configuración
 
@@ -115,6 +145,18 @@ Variables en `.env` (ver `.env.example`):
 | `DB_PORT` | Puerto de Postgres en el host (solo en `make dev`) | `55432` |
 
 Los valores de `.env.example` son solo para uso local. No se versiona ningún secreto real.
+
+## Estructura
+
+```
+apps/api/      Backend: FastAPI con Clean Architecture por módulos (students, classes, enrollments)
+apps/web/      Frontend: Next.js organizado por features
+bruno/         Colección de requests del API
+e2e/           Tests end-to-end (Playwright)
+docs/          Arquitectura general y decisiones (ADR)
+compose.yml    Sistema completo · compose.dev.yml: desarrollo con recarga en caliente
+Makefile       Todos los comandos, ejecutados en Docker
+```
 
 ## Documentación
 

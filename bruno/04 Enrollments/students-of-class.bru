@@ -1,0 +1,17 @@
+meta {
+  name: Students of a class
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/classes/{{classId}}/students
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body[0].id: eq {{studentId}}
+  res.body[0].enrolled_at: isString
+}

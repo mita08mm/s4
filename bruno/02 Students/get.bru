@@ -1,0 +1,16 @@
+meta {
+  name: Get student
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/students/{{studentId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.email: eq bruno.{{runId}}@s4.edu
+}

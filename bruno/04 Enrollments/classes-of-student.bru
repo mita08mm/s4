@@ -1,0 +1,16 @@
+meta {
+  name: Classes of a student
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/students/{{studentId}}/classes
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.length: eq 1
+}

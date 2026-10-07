@@ -1,0 +1,22 @@
+meta {
+  name: Unknown class is 404 (all or nothing)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/students/{{studentId}}/classes
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "class_ids": ["0190b6c4-0000-7000-8000-000000000000"]
+  }
+}
+
+assert {
+  res.status: eq 404
+  res.body.errors[0].field: eq class_ids
+}

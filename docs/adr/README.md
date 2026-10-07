@@ -19,4 +19,4 @@ Cada ADR documenta una decisión técnica: el contexto, lo que se decidió, las 
 | [0011](0011-modelo-de-datos.md) | Modelo de datos, integridad y búsqueda | Aceptada |
 | [0012](0012-contrato-front-back.md) | Contrato front–back y tipos generados | Propuesta |
 | [0013](0013-ui-y-experiencia.md) | Librerías de UI y experiencia de usuario | Aceptada |
-| [0014](0014-integracion-continua.md) | Integración continua con GitHub Actions | Propuesta |
+| [0014](0014-integracion-continua.md) | Integración continua con GitHub Actions | Aceptada |

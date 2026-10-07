@@ -1,0 +1,23 @@
+meta {
+  name: Null clears the description
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/classes/{{classId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "description": null
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.description: isNull
+  res.body.title: eq Clase de la colección
+}

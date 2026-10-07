@@ -1,0 +1,16 @@
+meta {
+  name: Search by description
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/classes?q=creada%20bruno
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.total: gte 1
+}

@@ -1,6 +1,6 @@
 # ADR 0010 — Estrategia de pruebas
 
-**Estado:** Aceptada (Bruno y Playwright pendientes)
+**Estado:** Aceptada
 
 ## Contexto
 
@@ -33,3 +33,8 @@ Se adopta la **opción B** (`tests/integration/conftest.py`):
 - Los tests unitarios usan dobles en memoria (`tests/unit/students/fakes.py`) que cumplen los puertos.
 
 El esquema de test se crea con `Base.metadata.create_all`; las migraciones se validan aparte, al aplicarse en el servicio `migrate`.
+
+## End-to-end y colección
+
+- **Playwright** (`e2e/`): corre en la imagen oficial `mcr.microsoft.com/playwright`, conectada a la red de Compose (`web:3000`, `api:8000`). Una fixture `api` crea los datos de cada test por API y los elimina al terminar, así los tests son independientes y se pueden repetir.
+- **Bruno** (`bruno/`): ver [ADR 0009](0009-documentacion-del-api.md).

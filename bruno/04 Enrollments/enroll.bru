@@ -1,0 +1,22 @@
+meta {
+  name: Enroll a student in two classes
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/students/{{studentId}}/classes
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "class_ids": ["{{classId}}", "{{secondClassId}}"]
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.length: eq 2
+}

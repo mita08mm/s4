@@ -1,0 +1,14 @@
+docs {
+  # S4 API
+
+  Recorrido completo del API: estudiantes, clases e inscripciones, con sus casos de error.
+  Cada ejecución crea datos con códigos únicos y los elimina al final, así que se puede
+  correr tantas veces como se quiera. Ejecutar con `make api-collection`.
+}
+
+script:pre-request {
+  // Unique codes per run, so the collection never collides with existing data.
+  if (!bru.getVar("runId")) {
+    bru.setVar("runId", String(Date.now()).slice(-6));
+  }
+}

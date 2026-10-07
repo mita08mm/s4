@@ -28,8 +28,10 @@ Hecho:
 
 - **`enrollments` completo**: endpoints anidados `/students/{id}/classes` y `/classes/{id}/students` (GET, POST masivo atómico e idempotente, DELETE). El módulo depende de los puertos de `students` y `classes` (`missing_ids`). En el front, páginas de detalle `/students/[id]` y `/classes/[id]`: las páginas de `app/` combinan el perfil (feature `students` o `classes`) con el panel de inscripciones (feature `enrollments`), porque una feature no importa otra. `EnrollPicker` (cmdk, selección múltiple) y `EnrollmentsPanel` con desinscripción optimista (`useOptimistic`). Filas y tarjetas de las listas llevan al detalle; editar queda en el lápiz. 43 tests de backend.
 
-Siguiente:
-1. Pendientes: colección de Bruno (`bruno/`), tipos del front generados desde OpenAPI (ADR 0012), CI con GitHub Actions (ADR 0014), Playwright E2E.
+- **Entregables de calidad completos:** colección de Bruno (`bruno/`, `make api-collection`, 24 requests / 47 assertions), tests E2E con Playwright (`e2e/`, `make e2e`, 7 tests con fixture `api` que crea y limpia datos), CI en `.github/workflows/ci.yml` (job `checks` = `make check`; job `system` = `make up` + colección + E2E).
+
+Pendiente / opcional:
+1. Tipos del front generados desde OpenAPI (ADR 0012, propuesto).
 2. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
 
 ## Todo corre en Docker
@@ -41,6 +43,7 @@ El host solo tiene Docker y make: no ejecutar `uv`, `pnpm`, `python` ni `node` e
 - `make check`: lint, tipos y tests de back y front (lo mismo que correrá el CI).
 - `make api-test`, `make api-lint`, `make api-format`, `make web-lint`, `make web-format`.
 - `make migration m="mensaje"` genera una migración con Alembic; `make migrate` la aplica.
+- `make api-collection` (Bruno) y `make e2e` (Playwright) corren contra el sistema levantado (`make up`), conectados a la red `s4_default`.
 - Un test puntual: `docker compose -f compose.yml -f compose.dev.yml run --rm --no-deps api pytest tests/ruta/test_x.py::test_nombre`.
 - Agregar una dependencia Python: editar `apps/api/pyproject.toml` y regenerar `uv.lock` en un contenedor uv (`ghcr.io/astral-sh/uv:<versión>-python3.14-trixie-slim`, montando `apps/api` con `-u $(id -u):$(id -g)`). En el front, lo mismo con `node:24-alpine` y `pnpm add`.
 

@@ -1,0 +1,23 @@
+meta {
+  name: Update only the last name
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/students/{{studentId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "last_name": "Colección Actualizada"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.last_name: eq Colección Actualizada
+  res.body.first_name: eq Bruno
+}

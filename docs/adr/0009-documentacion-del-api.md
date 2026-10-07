@@ -1,6 +1,6 @@
 # ADR 0009 — Documentación del API: OpenAPI + Scalar + Bruno
 
-**Estado:** Aceptada (la colección de Bruno está pendiente de crear)
+**Estado:** Aceptada
 
 ## Contexto
 
@@ -10,7 +10,7 @@ El enunciado exige documentación del API y recomienda OpenAPI/Swagger. También
 
 - **OpenAPI** generado por FastAPI desde el código (`/openapi.json`): la documentación no puede quedar desactualizada respecto de la implementación.
 - **Scalar** como interfaz de la documentación en `/docs`, en lugar del Swagger UI por defecto: lee el mismo OpenAPI, con mejor búsqueda y ejemplos de código.
-- **Bruno** para una colección de requests versionada en el repositorio (`bruno/`), con assertions, que sirve como demostración y como prueba ejecutable.
+- **Bruno** para una colección de requests versionada en el repositorio (`bruno/`), con assertions, que sirve como demostración y como prueba ejecutable (`make api-collection`, CLI de Bruno en Docker). Recorre estudiantes, clases, inscripciones y sus errores; genera códigos únicos por ejecución y limpia lo que crea. Tiene entornos `local` (`localhost:8000`) y `docker` (`api:8000`).
 
 ## Alternativas consideradas
 

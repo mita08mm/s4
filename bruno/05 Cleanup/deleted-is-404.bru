@@ -1,0 +1,16 @@
+meta {
+  name: Deleted student is 404
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/students/{{studentId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+  res.body.title: eq Not Found
+}
