@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from typing import Protocol
 from uuid import UUID
 
@@ -9,6 +10,10 @@ class StudentRepository(Protocol):
     """Port: what the use cases need from student storage."""
 
     async def get(self, student_id: UUID) -> Student | None: ...
+
+    async def missing_ids(self, ids: Collection[UUID]) -> set[UUID]:
+        """The ids in `ids` that do not exist."""
+        ...
 
     async def code_exists(self, code: str, *, exclude_id: UUID | None = None) -> bool: ...
 

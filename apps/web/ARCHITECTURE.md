@@ -34,7 +34,7 @@ apps/web/
 │   │   ├── home/                 #   components/ (hero, tarjetas), queries.ts
 │   │   ├── students/             #   components/, actions.ts, queries.ts, schemas.ts, types.ts
 │   │   ├── classes/              #   misma estructura; vista en grilla de tarjetas
-│   │   └── enrollments/
+│   │   └── enrollments/          #   paneles de inscripción, selector múltiple, acciones
 │   └── shared/                   # piezas técnicas reutilizables
 │       ├── config/server-env.ts  #   configuración de servidor (server-only)
 │       ├── layout/               #   providers, encabezado, paleta ⌘K
@@ -76,6 +76,8 @@ flowchart LR
 | `actions.ts` | Server Actions (`"use server"`) para crear, editar y eliminar: validan con Zod, llaman al API, traducen los Problem Details a errores por campo y llaman a `refresh()` |
 | `schemas.ts` | Esquema Zod compartido por el formulario y las Server Actions (mismas reglas que el API) |
 | `components/` | Vista cliente: búsqueda (`?q=` en la URL con debounce), tabla animada, panel de formulario y diálogo de confirmación |
+
+Una feature no importa a otra: las páginas de detalle (`app/students/[id]`, `app/classes/[id]`) combinan el perfil de su feature con el panel de `enrollments`. La desinscripción usa `useOptimistic` (React 19): la fila desaparece al instante y vuelve si el servidor responde con error.
 
 Las Server Actions son endpoints públicos, por eso validan la entrada otra vez en el servidor aunque el formulario ya lo haya hecho.
 

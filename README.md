@@ -9,7 +9,7 @@ Sistema para administrar **estudiantes**, **clases** y sus **inscripciones**, co
 | Base de datos | PostgreSQL 18 |
 | Infraestructura | Docker Compose |
 
-> Estado: gestión de estudiantes y clases completa (API e interfaz). Inscripciones en desarrollo.
+> Estado: todas las funcionalidades obligatorias completas: estudiantes, clases, inscripciones y búsquedas, en la API y en la interfaz.
 
 ## Requisitos
 
@@ -49,6 +49,12 @@ Base: `http://localhost:8000/api/v1`. Referencia completa e interactiva en `/doc
 | GET | `/classes/{id}` | Obtener | 200, 404, 422 |
 | PATCH | `/classes/{id}` | Actualizar; `"description": null` la borra | 200, 404, 409, 422 |
 | DELETE | `/classes/{id}` | Eliminar (y sus inscripciones) | 204, 404, 422 |
+| GET | `/students/{id}/classes` | Clases de un estudiante | 200, 404, 422 |
+| POST | `/students/{id}/classes` | Inscribirlo en varias clases (`{"class_ids": [...]}`) | 200, 404, 422 |
+| DELETE | `/students/{id}/classes/{class_id}` | Desinscribirlo de una clase | 204, 404, 422 |
+| GET | `/classes/{id}/students` | Estudiantes de una clase | 200, 404, 422 |
+| POST | `/classes/{id}/students` | Inscribir varios estudiantes (`{"student_ids": [...]}`) | 200, 404, 422 |
+| DELETE | `/classes/{id}/students/{student_id}` | Desinscribir a un estudiante | 204, 404, 422 |
 
 Ejemplo:
 
@@ -69,7 +75,9 @@ curl -X POST localhost:8000/api/v1/students \
 
 **Unicidad:** el código y el email de un estudiante, y el código de una clase, son únicos sin distinguir mayúsculas (se guardan normalizados). Un duplicado responde 409 e indica el campo en `errors`.
 
-**Datos de prueba:** al levantar, el servicio `migrate` aplica las migraciones y carga 12 estudiantes y 8 clases de ejemplo. Es idempotente.
+**Inscripciones:** un estudiante puede tomar varias clases. Inscribir es **idempotente** (repetir no duplica: clave primaria `(student_id, class_id)` + `ON CONFLICT DO NOTHING`) y **atómico** (si algún id no existe, responde 404 y no inscribe a nadie). Al eliminar un estudiante o una clase se eliminan sus inscripciones (`ON DELETE CASCADE`), nunca la otra entidad.
+
+**Datos de prueba:** al levantar, el servicio `migrate` aplica las migraciones y carga 12 estudiantes, 8 clases y sus inscripciones de ejemplo. Es idempotente.
 
 ## Comandos
 

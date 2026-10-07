@@ -1,6 +1,6 @@
 # ADR 0011 — Modelo de datos, integridad y búsqueda
 
-**Estado:** Aceptada (implementado: `students`, `classes`; pendiente: `enrollments`)
+**Estado:** Aceptada (implementado)
 
 ## Contexto
 
@@ -24,7 +24,8 @@ created_at, updated_at
 - **Validaciones de `Class`:** `code` con las mismas reglas que el de estudiante; `title` de 1 a 150 caracteres; `description` de hasta 1000.
 - **Identificador técnico separado del de negocio** (`code`): el código visible se puede editar sin romper relaciones. El id es **UUID v7** (`uuid.uuid7` de Python 3.14): es ordenable por tiempo, así los registros nuevos se agregan al final del índice de la clave primaria.
 - **Normalización:** `code` se guarda en mayúsculas y `email` en minúsculas, así la unicidad no distingue mayúsculas.
-- **Duplicados:** `UNIQUE` en `student_id` y `code`; clave primaria compuesta en `enrollments` para impedir inscripciones repetidas. Inscribir dos veces es idempotente (`PUT`).
+- **Duplicados:** `UNIQUE` en los `code` y en `email`; clave primaria compuesta `(student_id, class_id)` en `enrollments`, más un índice en `class_id` para las consultas desde la clase. Inscribir es idempotente: `INSERT … ON CONFLICT DO NOTHING`.
+- **Inscripción masiva y atómica:** `POST /students/{id}/classes` y `POST /classes/{id}/students` reciben listas de ids. El caso de uso verifica que existan todos antes de insertar; si falta alguno responde 404 (con `errors[].field`) y no inscribe a nadie.
 - **Eliminaciones:** al borrar un estudiante o una clase se borran sus inscripciones (`ON DELETE CASCADE`), nunca la otra entidad.
 - **Búsqueda:** el parámetro `q` se divide en palabras y **cada palabra debe aparecer** (coincidencia parcial, sin distinguir mayúsculas, `ILIKE`) en alguno de los campos de texto; para estudiantes: código, nombre, apellido y email. `%` y `_` se tratan como texto literal. Resultados paginados (`page`, `size` ≤ 100) y ordenados por apellido, nombre y código. No ignora tildes (mejora posible: extensión `unaccent`); para grandes volúmenes, `pg_trgm` con índice GIN.
 - **Transacciones:** *Unit of Work* explícito. Los repositorios nunca confirman; el caso de uso llama a `UnitOfWork.commit()` cuando termina. Si falla antes, la sesión se cierra sin confirmar.

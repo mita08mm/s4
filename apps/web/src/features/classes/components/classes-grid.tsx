@@ -7,6 +7,7 @@ import {
   SearchXIcon,
   Trash2Icon,
 } from "lucide-react";
+import Link from "next/link";
 import type { PointerEvent } from "react";
 
 import type { SchoolClass } from "@/features/classes/types";
@@ -135,10 +136,9 @@ export function ClassesGrid({
               </div>
             </div>
 
-            {/* The button covers the whole card, so any click on it opens the editor. */}
-            <button
-              type="button"
-              onClick={() => onEdit(schoolClass)}
+            {/* The link covers the whole card, so any click on it opens the detail page. */}
+            <Link
+              href={`/classes/${schoolClass.id}`}
               className="relative mt-auto pt-8 text-left outline-none after:absolute after:inset-0 focus-visible:after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-ring/50"
             >
               <h2 className="text-lg font-medium tracking-tight">
@@ -149,7 +149,7 @@ export function ClassesGrid({
                   <span className="italic">Sin descripción</span>
                 )}
               </p>
-            </button>
+            </Link>
           </motion.li>
         ))}
       </AnimatePresence>

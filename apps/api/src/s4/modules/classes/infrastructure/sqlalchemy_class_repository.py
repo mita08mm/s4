@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from uuid import UUID
 
 from sqlalchemy import ColumnElement, delete, exists, func, or_, select
@@ -20,6 +21,10 @@ class SqlAlchemyClassRepository:
     async def get(self, class_id: UUID) -> SchoolClass | None:
         model = await self._session.get(ClassModel, class_id)
         return model.to_entity() if model else None
+
+    async def missing_ids(self, ids: Collection[UUID]) -> set[UUID]:
+        found = await self._session.scalars(select(ClassModel.id).where(ClassModel.id.in_(ids)))
+        return set(ids) - set(found)
 
     async def code_exists(self, code: str, *, exclude_id: UUID | None = None) -> bool:
         condition = ClassModel.code == code

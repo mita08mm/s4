@@ -7,6 +7,7 @@ import {
   Trash2Icon,
   UserPlusIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 import type { Student } from "@/features/students/types";
 import { Button } from "@/shared/ui/button";
@@ -123,10 +124,9 @@ export function StudentsTable({
                   </span>
                 </TableCell>
                 <TableCell>
-                  {/* The button covers the whole row, so any click on it opens the editor. */}
-                  <button
-                    type="button"
-                    onClick={() => onEdit(student)}
+                  {/* The link covers the whole row, so any click on it opens the detail page. */}
+                  <Link
+                    href={`/students/${student.id}`}
                     className="flex items-center gap-3 text-left outline-none after:absolute after:inset-0 focus-visible:after:rounded-sm focus-visible:after:ring-2 focus-visible:after:ring-ring/50"
                   >
                     <span className="grid size-8 shrink-0 place-items-center rounded-full bg-foreground text-[11px] font-medium text-background">
@@ -140,7 +140,7 @@ export function StudentsTable({
                         {student.email}
                       </span>
                     </span>
-                  </button>
+                  </Link>
                 </TableCell>
                 <TableCell className="hidden text-muted-foreground md:table-cell">
                   {student.email}

@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from dataclasses import replace
 from datetime import UTC, datetime
 from uuid import UUID, uuid7
@@ -15,6 +16,9 @@ class InMemoryClassRepository:
     async def get(self, class_id: UUID) -> SchoolClass | None:
         school_class = self.classes.get(class_id)
         return replace(school_class) if school_class else None
+
+    async def missing_ids(self, ids: Collection[UUID]) -> set[UUID]:
+        return set(ids) - self.classes.keys()
 
     async def code_exists(self, code: str, *, exclude_id: UUID | None = None) -> bool:
         return any(c.code == code and c.id != exclude_id for c in self.classes.values())

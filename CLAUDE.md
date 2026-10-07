@@ -26,10 +26,11 @@ Hecho:
 
 - **`classes` completo** (back + front). Entidad `SchoolClass`; `SchoolClassChanges.description` usa el centinela `UNSET` (omitida = conservar, `null` = borrar). En el front se muestra como grilla de tarjetas (`ClassesGrid`); el buscador es genérico (`shared/ui/url-search-input.tsx`) y el detector de escritura para atajos está en `shared/lib/keyboard.ts`. Seed: 12 estudiantes y 8 clases. 31 tests de backend.
 
-Siguiente (en este orden):
-1. `enrollments`: inscribir varias clases a la vez, consultas en ambos sentidos, y detalle de estudiante y de clase con sus inscripciones.
-2. Pendientes: colección de Bruno (`bruno/`), tipos del front generados desde OpenAPI (ADR 0012), CI con GitHub Actions (ADR 0014), Playwright E2E.
-3. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
+- **`enrollments` completo**: endpoints anidados `/students/{id}/classes` y `/classes/{id}/students` (GET, POST masivo atómico e idempotente, DELETE). El módulo depende de los puertos de `students` y `classes` (`missing_ids`). En el front, páginas de detalle `/students/[id]` y `/classes/[id]`: las páginas de `app/` combinan el perfil (feature `students` o `classes`) con el panel de inscripciones (feature `enrollments`), porque una feature no importa otra. `EnrollPicker` (cmdk, selección múltiple) y `EnrollmentsPanel` con desinscripción optimista (`useOptimistic`). Filas y tarjetas de las listas llevan al detalle; editar queda en el lápiz. 43 tests de backend.
+
+Siguiente:
+1. Pendientes: colección de Bruno (`bruno/`), tipos del front generados desde OpenAPI (ADR 0012), CI con GitHub Actions (ADR 0014), Playwright E2E.
+2. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
 
 ## Todo corre en Docker
 

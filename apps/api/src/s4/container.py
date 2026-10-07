@@ -20,6 +20,15 @@ from s4.modules.classes.domain.class_repository import ClassRepository
 from s4.modules.classes.infrastructure.sqlalchemy_class_repository import (
     SqlAlchemyClassRepository,
 )
+from s4.modules.enrollments.application.enroll_student_in_classes import EnrollStudentInClasses
+from s4.modules.enrollments.application.enroll_students_in_class import EnrollStudentsInClass
+from s4.modules.enrollments.application.list_classes_of_student import ListClassesOfStudent
+from s4.modules.enrollments.application.list_students_of_class import ListStudentsOfClass
+from s4.modules.enrollments.application.unenroll import Unenroll
+from s4.modules.enrollments.domain.enrollment_repository import EnrollmentRepository
+from s4.modules.enrollments.infrastructure.sqlalchemy_enrollment_repository import (
+    SqlAlchemyEnrollmentRepository,
+)
 from s4.modules.students.application.create_student import CreateStudent
 from s4.modules.students.application.delete_student import DeleteStudent
 from s4.modules.students.application.get_student import GetStudent
@@ -97,3 +106,45 @@ def get_update_class(repository: ClassRepositoryDep, uow: UnitOfWorkDep) -> Upda
 
 def get_delete_class(repository: ClassRepositoryDep, uow: UnitOfWorkDep) -> DeleteClass:
     return DeleteClass(repository, uow)
+
+
+# ---------- enrollments ----------
+def get_enrollment_repository(session: SessionDep) -> EnrollmentRepository:
+    return SqlAlchemyEnrollmentRepository(session)
+
+
+EnrollmentRepositoryDep = Annotated[EnrollmentRepository, Depends(get_enrollment_repository)]
+
+
+def get_list_classes_of_student(
+    students: StudentRepositoryDep, enrollments: EnrollmentRepositoryDep
+) -> ListClassesOfStudent:
+    return ListClassesOfStudent(students, enrollments)
+
+
+def get_list_students_of_class(
+    classes: ClassRepositoryDep, enrollments: EnrollmentRepositoryDep
+) -> ListStudentsOfClass:
+    return ListStudentsOfClass(classes, enrollments)
+
+
+def get_enroll_student_in_classes(
+    students: StudentRepositoryDep,
+    classes: ClassRepositoryDep,
+    enrollments: EnrollmentRepositoryDep,
+    uow: UnitOfWorkDep,
+) -> EnrollStudentInClasses:
+    return EnrollStudentInClasses(students, classes, enrollments, uow)
+
+
+def get_enroll_students_in_class(
+    students: StudentRepositoryDep,
+    classes: ClassRepositoryDep,
+    enrollments: EnrollmentRepositoryDep,
+    uow: UnitOfWorkDep,
+) -> EnrollStudentsInClass:
+    return EnrollStudentsInClass(students, classes, enrollments, uow)
+
+
+def get_unenroll(enrollments: EnrollmentRepositoryDep, uow: UnitOfWorkDep) -> Unenroll:
+    return Unenroll(enrollments, uow)

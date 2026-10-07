@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from scalar_fastapi import get_scalar_api_reference
 
 from s4.modules.classes.http.router import router as classes_router
+from s4.modules.enrollments.http.router import router as enrollments_router
 from s4.modules.students.http.router import router as students_router
 from s4.shared.config import get_settings
 from s4.shared.http import health
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(students_router, prefix=API_PREFIX)
     app.include_router(classes_router, prefix=API_PREFIX)
+    app.include_router(enrollments_router, prefix=API_PREFIX)
 
     @app.get("/docs", include_in_schema=False)
     async def api_reference() -> HTMLResponse:

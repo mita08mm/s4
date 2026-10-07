@@ -6,9 +6,11 @@ Run with `python -m s4.shared.database.seed` (the `migrate` service does it).
 import asyncio
 
 import structlog
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from s4.modules.classes.infrastructure.class_model import ClassModel
+from s4.modules.enrollments.infrastructure.enrollment_model import EnrollmentModel
 from s4.modules.students.infrastructure.student_model import StudentModel
 from s4.shared.database.session import get_engine, get_sessionmaker
 
@@ -40,6 +42,21 @@ CLASSES = [
     ("ING-101", "Inglés Técnico", "Lectura y escritura de documentación técnica."),
 ]
 
+# Student code -> class codes. A00111 has no classes on purpose (empty state).
+ENROLLMENTS = {
+    "A00101": ["MAT-101", "FIS-101", "PRG-101"],
+    "A00102": ["MAT-101", "QUI-101"],
+    "A00103": ["PRG-101", "PRG-201", "BDD-201"],
+    "A00104": ["FIS-101", "MAT-101"],
+    "A00105": ["HIS-101", "ING-101"],
+    "A00106": ["PRG-101", "BDD-201"],
+    "A00107": ["MAT-101", "ING-101", "HIS-101"],
+    "A00108": ["QUI-101"],
+    "A00109": ["PRG-201", "BDD-201", "ING-101"],
+    "A00110": ["FIS-101"],
+    "A00112": ["MAT-101", "PRG-101"],
+}
+
 
 async def seed() -> None:
     async with get_sessionmaker()() as session:
@@ -59,6 +76,21 @@ async def seed() -> None:
                 [
                     {"code": code, "title": title, "description": description}
                     for code, title, description in CLASSES
+                ]
+            )
+            .on_conflict_do_nothing()
+        )
+        students = await session.execute(select(StudentModel.code, StudentModel.id))
+        classes = await session.execute(select(ClassModel.code, ClassModel.id))
+        student_ids = {code: id_ for code, id_ in students}
+        class_ids = {code: id_ for code, id_ in classes}
+        await session.execute(
+            insert(EnrollmentModel)
+            .values(
+                [
+                    {"student_id": student_ids[student], "class_id": class_ids[code]}
+                    for student, codes in ENROLLMENTS.items()
+                    for code in codes
                 ]
             )
             .on_conflict_do_nothing()
