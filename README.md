@@ -49,7 +49,7 @@ Atajos: `⌘K` / `Ctrl+K` abre la paleta de comandos y `N` crea un estudiante o 
 
 ## API
 
-Base: `http://localhost:8000/api/v1`. Referencia completa e interactiva en `/docs`.
+Base: `http://localhost:8000/api/v1`. Referencia completa e interactiva en `/docs`; la especificación también está versionada en [`docs/openapi.json`](docs/openapi.json).
 
 | Método | Ruta | Descripción | Respuestas |
 |---|---|---|---|
@@ -110,6 +110,7 @@ Ejecuta `make` (o `make help`) para ver la lista completa.
 | `make migration m="mensaje"` | Genera una migración a partir de los modelos |
 | `make migrate` | Aplica las migraciones pendientes |
 | `make web-lint` / `make web-format` | Lint y tipos / autoformato del frontend |
+| `make web-types` | Exporta el OpenAPI (`docs/openapi.json`) y regenera los tipos TypeScript del front |
 | `make api-collection` | Colección de Bruno contra el API en ejecución |
 | `make e2e` | Tests end-to-end con Playwright contra el sistema en ejecución |
 
@@ -128,10 +129,11 @@ docker compose -f compose.yml -f compose.dev.yml run --rm --no-deps api pytest t
 | Colección del API | [Bruno](https://www.usebruno.com/) (`bruno/`) | Recorrido completo del API con assertions; se puede abrir en la app de Bruno para probar a mano | `make api-collection` |
 | End-to-end | Playwright (`e2e/`) | Flujos reales en el navegador: crear, buscar, editar, eliminar, validaciones, inscribir varias clases, desinscribir, ⌘K, tema | `make e2e` |
 | Estáticas | Ruff, mypy (strict), Biome, tsc | Estilo, errores comunes y tipos en back y front | `make check` |
+| Contrato | openapi-typescript | Los tipos del front se generan desde el OpenAPI del back: si el API cambia, el front deja de compilar donde corresponde | `make web-types-check` |
 
 `make api-collection` y `make e2e` necesitan el sistema levantado (`make up`). Ambos crean sus propios datos con códigos únicos y los eliminan al terminar.
 
-**CI:** GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) ejecuta `make check` y luego levanta el sistema y corre la colección de Bruno y los tests E2E, con los mismos comandos que en local.
+**CI:** GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) ejecuta `make check`, verifica que los tipos del front coincidan con el OpenAPI y luego levanta el sistema y corre la colección de Bruno y los tests E2E, con los mismos comandos que en local.
 
 ## Configuración
 

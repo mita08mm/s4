@@ -30,9 +30,10 @@ Hecho:
 
 - **Entregables de calidad completos:** colección de Bruno (`bruno/`, `make api-collection`, 24 requests / 47 assertions), tests E2E con Playwright (`e2e/`, `make e2e`, 7 tests con fixture `api` que crea y limpia datos), CI en `.github/workflows/ci.yml` (job `checks` = `make check`; job `system` = `make up` + colección + E2E).
 
+- **Contrato front–back (ADR 0012):** los tipos de respuesta del API se generan con `make web-types` (exporta `docs/openapi.json` con `python -m s4.openapi` y corre openapi-typescript → `apps/web/src/shared/api/schema.ts`; alias en `shared/api/types.ts`). **Después de cambiar schemas del backend, correr `make web-types`**; el CI ejecuta `make web-types-check`. No escribir tipos de respuesta a mano ni editar `schema.ts`.
+
 Pendiente / opcional:
-1. Tipos del front generados desde OpenAPI (ADR 0012, propuesto).
-2. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
+1. Decisión abierta: mantener el servicio `migrate` separado (recomendado) o migrar al arrancar la API.
 
 ## Todo corre en Docker
 

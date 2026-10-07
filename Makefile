@@ -7,7 +7,7 @@ AS_USER     := -u $(shell id -u):$(shell id -g)
 .DEFAULT_GOAL := help
 .PHONY: help up dev down logs ps clean \
         api-test api-lint api-format api-shell migration migrate \
-        web-lint web-format api-collection e2e check
+        web-lint web-format web-types web-types-check api-collection e2e check
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -62,6 +62,15 @@ web-lint: .env ## Lint and type check the frontend
 
 web-format: .env ## Auto-fix lint issues and format the frontend
 	$(COMPOSE_DEV) run --rm --no-deps --build $(AS_USER) -v ./apps/web/src:/app/src web ./node_modules/.bin/biome check --write src
+
+web-types: .env ## Export the OpenAPI spec and regenerate the frontend API types from it
+	$(COMPOSE_DEV) build api
+	$(COMPOSE_DEV) run --rm --no-deps -T api python -m s4.openapi > docs/openapi.json
+	docker run --rm $(AS_USER) -e HOME=/tmp -v ./docs:/docs:ro -v ./apps/web/src/shared/api:/out node:24-alpine \
+		npx -y openapi-typescript@7.13.0 /docs/openapi.json -o /out/schema.ts
+
+web-types-check: web-types ## Fail if the generated API types are out of date (used by CI)
+	git diff --exit-code -- docs/openapi.json apps/web/src/shared/api/schema.ts
 
 # ---------- against the running system (make up / make dev) ----------
 PLAYWRIGHT := mcr.microsoft.com/playwright:v1.63.0-noble

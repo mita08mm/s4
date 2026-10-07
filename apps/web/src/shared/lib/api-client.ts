@@ -1,16 +1,9 @@
 import "server-only";
 
+import type { ProblemDetails } from "@/shared/api/types";
 import { serverEnv } from "@/shared/config/server-env";
 
-/** RFC 9457 Problem Details, as returned by the API on every error. */
-export type ProblemDetails = {
-  type: string;
-  title: string;
-  status: number;
-  detail?: string;
-  instance?: string;
-  errors?: { field: string; message: string }[];
-};
+export type { ProblemDetails };
 
 /** Paginated list, as returned by every list endpoint. */
 export type Page<T> = {

@@ -36,6 +36,7 @@ apps/web/
 │   │   ├── classes/              #   misma estructura; vista en grilla de tarjetas
 │   │   └── enrollments/          #   paneles de inscripción, selector múltiple, acciones
 │   └── shared/                   # piezas técnicas reutilizables
+│       ├── api/                  #   schema.ts (generado desde OpenAPI) + types.ts (alias)
 │       ├── config/server-env.ts  #   configuración de servidor (server-only)
 │       ├── layout/               #   providers, encabezado, paleta ⌘K
 │       ├── lib/
@@ -81,7 +82,7 @@ Una feature no importa a otra: las páginas de detalle (`app/students/[id]`, `ap
 
 Las Server Actions son endpoints públicos, por eso validan la entrada otra vez en el servidor aunque el formulario ya lo haya hecho.
 
-Los tipos del API se generarán desde OpenAPI ([ADR 0012](../../docs/adr/0012-contrato-front-back.md)).
+Los tipos de las respuestas del API **se generan desde su OpenAPI** (`src/shared/api/schema.ts`, con `make web-types`) y `src/shared/api/types.ts` les da nombres cortos. Si el backend cambia un campo, `tsc` marca cada uso en el front ([ADR 0012](../../docs/adr/0012-contrato-front-back.md)).
 
 ## 5. Imagen Docker
 

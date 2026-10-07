@@ -1,21 +1,4 @@
-/** A class as listed from a student (`EnrolledClassResponse`). */
-export type EnrolledClass = {
-  id: string;
-  code: string;
-  title: string;
-  description: string | null;
-  enrolled_at: string;
-};
-
-/** A student as listed from a class (`EnrolledStudentResponse`). */
-export type EnrolledStudent = {
-  id: string;
-  code: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  enrolled_at: string;
-};
+export type { EnrolledClass, EnrolledStudent } from "@/shared/api/types";
 
 /** Something that can be picked in the enroll dialog. */
 export type PickerOption = {

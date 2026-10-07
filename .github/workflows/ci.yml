@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: Backend lint + types, backend tests, frontend lint + types
         run: make check
+      - name: Frontend API types match the backend OpenAPI spec
+        run: make web-types-check
 
   system:
     name: Full system, API collection and E2E

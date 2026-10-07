@@ -17,6 +17,6 @@ Cada ADR documenta una decisión técnica: el contexto, lo que se decidió, las 
 | [0009](0009-documentacion-del-api.md) | Documentación del API: OpenAPI + Scalar + Bruno | Aceptada |
 | [0010](0010-estrategia-de-pruebas.md) | Estrategia de pruebas | Aceptada |
 | [0011](0011-modelo-de-datos.md) | Modelo de datos, integridad y búsqueda | Aceptada |
-| [0012](0012-contrato-front-back.md) | Contrato front–back y tipos generados | Propuesta |
+| [0012](0012-contrato-front-back.md) | Contrato front–back con tipos generados desde OpenAPI | Aceptada |
 | [0013](0013-ui-y-experiencia.md) | Librerías de UI y experiencia de usuario | Aceptada |
 | [0014](0014-integracion-continua.md) | Integración continua con GitHub Actions | Aceptada |
